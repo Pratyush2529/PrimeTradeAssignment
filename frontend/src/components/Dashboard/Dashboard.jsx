@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { taskAPI } from '../../services/api';
 import TaskList from '../Tasks/TaskList';
 import TaskForm from '../Tasks/TaskForm';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const Dashboard = () => {
     const { user } = useAuth();
