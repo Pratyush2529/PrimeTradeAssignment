@@ -12,7 +12,6 @@ A scalable REST API with authentication, role-based access control, and CRUD ope
 - ✅ Rate limiting for API security
 - ✅ API versioning (v1)
 - ✅ Comprehensive error handling
-- ✅ Swagger API documentation
 - ✅ MongoDB with Mongoose ODM
 
 ## 📋 Prerequisites
@@ -72,10 +71,7 @@ The server will start on `http://localhost:5000`
 
 ## 📚 API Documentation
 
-Once the server is running, access the Swagger documentation at:
-```
-http://localhost:5000/api-docs
-```
+Use **Postman** or any HTTP client to test the API. See the API endpoints section below for all available routes.
 
 ## 🔗 API Endpoints
 
@@ -144,7 +140,7 @@ backend/
 ├── src/
 │   ├── config/
 │   │   ├── database.js       # MongoDB connection
-│   │   └── swagger.js        # Swagger configuration
+│   │   └── database.js       # MongoDB connection
 │   ├── controllers/
 │   │   ├── authController.js # Authentication logic
 │   │   └── taskController.js # Task CRUD logic
@@ -231,9 +227,10 @@ db.users.updateOne(
 ## 🧪 Testing
 
 You can test the API using:
-- **Swagger UI**: http://localhost:5000/api-docs
-- **Postman**: Import the collection from `/postman` folder
+- **Postman**: Create a collection with all endpoints
 - **cURL**: Command-line testing
+- **Thunder Client** (VS Code extension)
+- **Insomnia**: REST client
 
 ## 🚀 Deployment
 
@@ -258,8 +255,6 @@ Make sure to set these in your hosting platform:
 - **cors**: Cross-origin resource sharing
 - **dotenv**: Environment variables
 - **express-rate-limit**: Rate limiting
-- **swagger-ui-express**: API documentation
-- **swagger-jsdoc**: Swagger spec generation
 
 ## 🤝 Contributing
 

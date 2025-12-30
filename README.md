@@ -17,7 +17,6 @@ This project demonstrates a scalable REST API with authentication and role-based
 - ✅ Rate limiting for API security
 - ✅ API versioning (v1)
 - ✅ Comprehensive error handling
-- ✅ Swagger API documentation
 - ✅ MongoDB with Mongoose ODM
 
 ### Frontend
@@ -73,10 +72,7 @@ Frontend will run on `http://localhost:5173`
 
 ## 📚 API Documentation
 
-Once the backend is running, access the Swagger documentation at:
-```
-http://localhost:5000/api-docs
-```
+Use **Postman** or any HTTP client to test the API. All endpoints are documented in the backend README file.
 
 ## 🗂️ Project Structure
 
@@ -84,7 +80,7 @@ http://localhost:5000/api-docs
 PrimeTradeAssignment/
 ├── backend/                    # Node.js/Express backend
 │   ├── src/
-│   │   ├── config/            # Database & Swagger config
+│   │   ├── config/            # Database config
 │   │   ├── controllers/       # Route controllers
 │   │   ├── middleware/        # Auth, validation, error handling
 │   │   ├── models/            # Mongoose models
@@ -191,7 +187,6 @@ PrimeTradeAssignment/
 - MongoDB & Mongoose
 - JWT & Bcrypt
 - Express Validator
-- Swagger UI
 
 ### Frontend
 - React 18
@@ -203,7 +198,7 @@ PrimeTradeAssignment/
 ## 🧪 Testing
 
 ### Backend Testing
-Use Swagger UI at `http://localhost:5000/api-docs` or import the Postman collection.
+Use **Postman** or any HTTP client to test the API endpoints.
 
 ### Frontend Testing
 1. Register a new user
