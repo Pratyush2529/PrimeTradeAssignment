@@ -1,10 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import swaggerUi from 'swagger-ui-express';
 import rateLimit from 'express-rate-limit';
 import connectDB from './config/database.js';
-import swaggerSpec from './config/swagger.js';
 import routes from './routes/index.js';
 import errorHandler from './middleware/errorHandler.js';
 
@@ -41,8 +39,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 // API routes
 app.use('/api', routes);
@@ -53,7 +50,6 @@ app.get('/', (req, res) => {
         success: true,
         message: 'Welcome to PrimeTrade Assignment API',
         version: '1.0.0',
-        documentation: '/api-docs',
     });
 });
 
@@ -72,7 +68,6 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
