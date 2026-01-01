@@ -2,25 +2,17 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { successResponse, errorResponse } from '../utils/responseHandler.js';
 
-/**
- * Generate JWT token
- */
+
 const generateToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRE || '24h',
     });
 };
 
-/**
- * @desc    Register a new user
- * @route   POST /api/v1/auth/register
- * @access  Public
- */
 export const register = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
 
-        // Check if user already exists
         const existingUser = await User.findOne({
             $or: [{ email }, { username }],
         });
@@ -34,19 +26,22 @@ export const register = async (req, res, next) => {
             }
         }
 
-        // Create new user
         const user = await User.create({
             username,
             email,
             password,
         });
 
-        // Generate token
         const token = generateToken(user._id);
 
-        // Return response
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
         return successResponse(res, 201, 'User registered successfully', {
-            token,
             user: {
                 id: user._id,
                 username: user.username,
@@ -59,35 +54,32 @@ export const register = async (req, res, next) => {
     }
 };
 
-/**
- * @desc    Login user
- * @route   POST /api/v1/auth/login
- * @access  Public
- */
 export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        // Find user by email (include password field)
         const user = await User.findOne({ email }).select('+password');
 
         if (!user) {
             return errorResponse(res, 401, 'Invalid email or password');
         }
 
-        // Check password
         const isPasswordValid = await user.comparePassword(password);
 
         if (!isPasswordValid) {
             return errorResponse(res, 401, 'Invalid email or password');
         }
 
-        // Generate token
         const token = generateToken(user._id);
 
-        // Return response
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
         return successResponse(res, 200, 'Login successful', {
-            token,
             user: {
                 id: user._id,
                 username: user.username,
@@ -100,11 +92,6 @@ export const login = async (req, res, next) => {
     }
 };
 
-/**
- * @desc    Get current user profile
- * @route   GET /api/v1/auth/me
- * @access  Private
- */
 export const getMe = async (req, res, next) => {
     try {
         const user = await User.findById(req.user._id);
@@ -122,3 +109,53 @@ export const getMe = async (req, res, next) => {
         next(error);
     }
 };
+
+export const logout = async (req, res, next) => {
+    try {
+        res.cookie('token', '', {
+            httpOnly: true,
+            expires: new Date(0),
+        });
+
+        return successResponse(res, 200, 'Logout successful');
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+export const updateProfile = async (req, res, next) => {
+    try {
+        const { username } = req.body;
+        const userId = req.user._id;
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return errorResponse(res, 404, 'User not found');
+        }
+
+        if (username && username !== user.username) {
+            const usernameExists = await User.findOne({ username, _id: { $ne: userId } });
+            if (usernameExists) {
+                return errorResponse(res, 400, 'Username already taken');
+            }
+            user.username = username;
+        }
+
+        await user.save();
+
+        return successResponse(res, 200, 'Profile updated successfully', {
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+

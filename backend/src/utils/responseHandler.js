@@ -1,6 +1,4 @@
-/**
- * Standard API response handler
- */
+
 export const successResponse = (res, statusCode, message, data = null) => {
     const response = {
         success: true,
@@ -14,9 +12,6 @@ export const successResponse = (res, statusCode, message, data = null) => {
     return res.status(statusCode).json(response);
 };
 
-/**
- * Standard API error response handler
- */
 export const errorResponse = (res, statusCode, message, errors = null) => {
     const response = {
         success: false,

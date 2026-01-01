@@ -30,15 +30,13 @@ const taskSchema = new mongoose.Schema(
         },
     },
     {
-        timestamps: true, // Adds createdAt and updatedAt
+        timestamps: true,
     }
 );
 
-// Index for faster queries
 taskSchema.index({ userId: 1, status: 1 });
 taskSchema.index({ userId: 1, createdAt: -1 });
 
-// Method to get task without version key
 taskSchema.methods.toJSON = function () {
     const task = this.toObject();
     delete task.__v;

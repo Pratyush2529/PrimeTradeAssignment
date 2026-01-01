@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
-import { taskAPI } from '../../services/api';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { API_BASE_URL, AXIOS_CONFIG } from '../../utils/constants';
 import TaskList from '../Tasks/TaskList';
 import TaskForm from '../Tasks/TaskForm';
-import { useAuth } from '../../hooks/useAuth';
+import AdminPanel from './AdminPanel';
+import { selectUser } from '../../store/slices/authSlice';
 
 const Dashboard = () => {
-    const { user } = useAuth();
+    const user = useSelector(selectUser);
     const [tasks, setTasks] = useState([]);
+    const [adminStats, setAdminStats] = useState({ total: 0, pending: 0, inProgress: 0, completed: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showForm, setShowForm] = useState(false);
@@ -15,7 +19,10 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchTasks();
-    }, [filter]);
+        if (user?.role === 'admin') {
+            fetchAdminStats();
+        }
+    }, [filter, user]);
 
     const fetchTasks = async () => {
         try {
@@ -24,13 +31,35 @@ const Dashboard = () => {
             if (filter.status) params.status = filter.status;
             if (filter.priority) params.priority = filter.priority;
 
-            const response = await taskAPI.getTasks(params);
+            const response = await axios.get(
+                `${API_BASE_URL}/v1/tasks`,
+                { ...AXIOS_CONFIG, params }
+            );
             setTasks(response.data.data.tasks);
             setError('');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch tasks');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchAdminStats = async () => {
+        try {
+            const response = await axios.get(
+                `${API_BASE_URL}/v1/admin/tasks`,
+                { ...AXIOS_CONFIG, params: { limit: 1000 } }
+            );
+            const allTasks = response.data.data.tasks;
+
+            const total = allTasks.length;
+            const pending = allTasks.filter((t) => t.status === 'pending').length;
+            const inProgress = allTasks.filter((t) => t.status === 'in_progress').length;
+            const completed = allTasks.filter((t) => t.status === 'completed').length;
+
+            setAdminStats({ total, pending, inProgress, completed });
+        } catch (err) {
+            console.error('Failed to fetch admin stats:', err);
         }
     };
 
@@ -50,7 +79,10 @@ const Dashboard = () => {
         }
 
         try {
-            await taskAPI.deleteTask(taskId);
+            await axios.delete(
+                `${API_BASE_URL}/v1/tasks/${taskId}`,
+                AXIOS_CONFIG
+            );
             fetchTasks();
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to delete task');
@@ -61,6 +93,9 @@ const Dashboard = () => {
         setShowForm(false);
         setEditingTask(null);
         fetchTasks();
+        if (user?.role === 'admin') {
+            fetchAdminStats();
+        }
     };
 
     const handleFormCancel = () => {
@@ -76,25 +111,27 @@ const Dashboard = () => {
         return { total, pending, inProgress, completed };
     };
 
-    const stats = getTaskStats();
+    const stats = user?.role === 'admin' ? adminStats : getTaskStats();
 
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">
                         Welcome, {user?.username}!
                     </h1>
                     <p className="mt-2 text-gray-600">
-                        Manage your tasks efficiently
+                        {user?.role === 'admin'
+                            ? 'Manage all users and tasks efficiently'
+                            : 'Manage your tasks efficiently'}
                     </p>
                 </div>
 
-                {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                        <h3 className="text-sm font-medium opacity-90">Total Tasks</h3>
+                        <h3 className="text-sm font-medium opacity-90">
+                            {user?.role === 'admin' ? 'Total Tasks (All Users)' : 'Total Tasks'}
+                        </h3>
                         <p className="text-3xl font-bold mt-2">{stats.total}</p>
                     </div>
                     <div className="card bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
@@ -111,7 +148,6 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Actions and Filters */}
                 <div className="card mb-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <button
@@ -147,14 +183,12 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Error Message */}
                 {error && (
                     <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                         {error}
                     </div>
                 )}
 
-                {/* Task Form Modal */}
                 {showForm && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -167,18 +201,24 @@ const Dashboard = () => {
                     </div>
                 )}
 
-                {/* Task List */}
-                {loading ? (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-                    </div>
-                ) : (
-                    <TaskList
-                        tasks={tasks}
-                        onEdit={handleEditTask}
-                        onDelete={handleDeleteTask}
-                    />
-                )}
+                {user?.role === 'admin' && <AdminPanel />}
+
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                        {user?.role === 'admin' ? 'My Tasks' : 'Your Tasks'}
+                    </h2>
+                    {loading ? (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                        </div>
+                    ) : (
+                        <TaskList
+                            tasks={tasks}
+                            onEdit={handleEditTask}
+                            onDelete={handleDeleteTask}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );

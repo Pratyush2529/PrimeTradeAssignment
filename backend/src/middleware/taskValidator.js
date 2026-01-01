@@ -1,9 +1,7 @@
 import { body, validationResult } from 'express-validator';
 import { errorResponse } from '../utils/responseHandler.js';
 
-/**
- * Validation rules for creating a task
- */
+
 export const createTaskValidation = [
     body('title')
         .trim()
@@ -29,9 +27,7 @@ export const createTaskValidation = [
         .withMessage('Status must be pending, in_progress, or completed'),
 ];
 
-/**
- * Validation rules for updating a task
- */
+
 export const updateTaskValidation = [
     body('title')
         .optional()
@@ -58,9 +54,6 @@ export const updateTaskValidation = [
         .withMessage('Status must be pending, in_progress, or completed'),
 ];
 
-/**
- * Middleware to handle validation errors
- */
 export const validate = (req, res, next) => {
     const errors = validationResult(req);
 

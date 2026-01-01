@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { taskAPI } from '../../services/api';
+import axios from 'axios';
+import { API_BASE_URL, AXIOS_CONFIG } from '../../utils/constants';
 
 const TaskForm = ({ task, onSuccess, onCancel }) => {
     const [formData, setFormData] = useState({
@@ -38,10 +39,18 @@ const TaskForm = ({ task, onSuccess, onCancel }) => {
         try {
             if (task) {
                 // Update existing task
-                await taskAPI.updateTask(task._id, formData);
+                await axios.put(
+                    `${API_BASE_URL}/v1/tasks/${task._id}`,
+                    formData,
+                    AXIOS_CONFIG
+                );
             } else {
                 // Create new task
-                await taskAPI.createTask(formData);
+                await axios.post(
+                    `${API_BASE_URL}/v1/tasks`,
+                    formData,
+                    AXIOS_CONFIG
+                );
             }
             onSuccess();
         } catch (err) {

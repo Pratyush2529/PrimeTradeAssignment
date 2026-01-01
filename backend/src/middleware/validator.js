@@ -1,9 +1,7 @@
 import { body, validationResult } from 'express-validator';
 import { errorResponse } from '../utils/responseHandler.js';
 
-/**
- * Validation rules for user registration
- */
+
 export const registerValidation = [
     body('username')
         .trim()
@@ -25,9 +23,6 @@ export const registerValidation = [
         .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number'),
 ];
 
-/**
- * Validation rules for user login
- */
 export const loginValidation = [
     body('email')
         .trim()
@@ -40,9 +35,16 @@ export const loginValidation = [
         .withMessage('Password is required'),
 ];
 
-/**
- * Middleware to handle validation errors
- */
+export const updateProfileValidation = [
+    body('username')
+        .optional()
+        .trim()
+        .isLength({ min: 3, max: 50 })
+        .withMessage('Username must be between 3 and 50 characters')
+        .matches(/^[a-zA-Z0-9_]+$/)
+        .withMessage('Username can only contain letters, numbers, and underscores'),
+];
+
 export const validate = (req, res, next) => {
     const errors = validationResult(req);
 
@@ -53,3 +55,4 @@ export const validate = (req, res, next) => {
 
     next();
 };
+

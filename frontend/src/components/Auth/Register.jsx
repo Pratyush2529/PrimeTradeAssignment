@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import { API_BASE_URL, AXIOS_CONFIG } from '../../utils/constants';
+import { setCredentials, setLoading, setError, clearError, selectLoading, selectError } from '../../store/slices/authSlice';
 
 const Register = () => {
     const navigate = useNavigate();
-    const { register } = useAuth();
+    const dispatch = useDispatch();
+    const loading = useSelector(selectLoading);
+    const error = useSelector(selectError);
+
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: '',
         confirmPassword: '',
     });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [localError, setLocalError] = useState('');
     const [success, setSuccess] = useState('');
 
     const handleChange = (e) => {
@@ -20,41 +25,58 @@ const Register = () => {
             ...formData,
             [e.target.name]: e.target.value,
         });
-        setError('');
+        setLocalError('');
+        dispatch(clearError());
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
+        setLocalError('');
         setSuccess('');
 
         // Validate passwords match
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            setLoading(false);
+            setLocalError('Passwords do not match');
             return;
         }
 
         // Validate password strength
         if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
-            setLoading(false);
+            setLocalError('Password must be at least 6 characters');
             return;
         }
 
-        const { confirmPassword, ...registerData } = formData;
-        const result = await register(registerData);
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+        if (!passwordRegex.test(formData.password)) {
+            setLocalError('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+            return;
+        }
 
-        if (result.success) {
+        try {
+            dispatch(setLoading(true));
+            dispatch(clearError());
+
+            const { confirmPassword, ...registerData } = formData;
+            const response = await axios.post(
+                `${API_BASE_URL}/v1/auth/register`,
+                registerData,
+                AXIOS_CONFIG
+            );
+            const { user } = response.data.data;
+
+            dispatch(setCredentials({ user }));
             setSuccess('Registration successful! Redirecting...');
+
             setTimeout(() => {
                 navigate('/dashboard');
             }, 1500);
-        } else {
-            setError(result.error);
+        } catch (err) {
+            const errorMessage = err.response?.data?.message || 'Registration failed';
+            setLocalError(errorMessage);
+            dispatch(setError(errorMessage));
+        } finally {
+            dispatch(setLoading(false));
         }
-        setLoading(false);
     };
 
     return (
@@ -68,9 +90,9 @@ const Register = () => {
                         </p>
                     </div>
 
-                    {error && (
+                    {(error || localError) && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                            {error}
+                            {localError || error}
                         </div>
                     )}
 

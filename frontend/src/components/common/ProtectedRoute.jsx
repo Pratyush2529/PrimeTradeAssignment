@@ -1,8 +1,11 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated, selectIsAdmin, selectLoading } from '../../store/slices/authSlice';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
-    const { isAuthenticated, isAdmin, loading } = useAuth();
+    const isAuthenticated = useSelector(selectIsAuthenticated);
+    const isAdmin = useSelector(selectIsAdmin);
+    const loading = useSelector(selectLoading);
 
     if (loading) {
         return (

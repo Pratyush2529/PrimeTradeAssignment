@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../store/slices/authSlice';
 
 const Home = () => {
-    const { isAuthenticated } = useAuth();
+    const isAuthenticated = useSelector(selectIsAuthenticated);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50">

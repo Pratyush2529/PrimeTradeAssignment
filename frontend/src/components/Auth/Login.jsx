@@ -1,38 +1,59 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import { API_BASE_URL, AXIOS_CONFIG } from '../../utils/constants';
+import { setCredentials, setLoading, setError, clearError, selectLoading, selectError } from '../../store/slices/authSlice';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const dispatch = useDispatch();
+    const loading = useSelector(selectLoading);
+    const error = useSelector(selectError);
+
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [localError, setLocalError] = useState('');
 
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
         });
-        setError('');
+        setLocalError('');
+        dispatch(clearError());
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
 
-        const result = await login(formData);
+        try {
+            dispatch(setLoading(true));
+            dispatch(clearError());
 
-        if (result.success) {
+            const response = await axios.post(
+                `${API_BASE_URL}/v1/auth/login`,
+                formData,
+                AXIOS_CONFIG
+            );
+            const { user } = response.data.data;
+
+            dispatch(setCredentials({ user }));
             navigate('/dashboard');
-        } else {
-            setError(result.error);
+        } catch (err) {
+            const errorMessage = err.response?.data?.message || 'Login failed';
+            setLocalError(errorMessage);
+            dispatch(setError(errorMessage));
+
+            // Handle 401 redirect
+            if (err.response?.status === 401) {
+                navigate('/login');
+            }
+        } finally {
+            dispatch(setLoading(false));
         }
-        setLoading(false);
     };
 
     return (
@@ -46,9 +67,9 @@ const Login = () => {
                         </p>
                     </div>
 
-                    {error && (
+                    {(error || localError) && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                            {error}
+                            {localError || error}
                         </div>
                     )}
 

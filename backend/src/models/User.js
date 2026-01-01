@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Password is required'],
             minlength: [6, 'Password must be at least 6 characters'],
-            select: false, // Don't return password by default
+            select: false,
         },
         role: {
             type: String,
@@ -35,13 +35,11 @@ const userSchema = new mongoose.Schema(
         },
     },
     {
-        timestamps: true, // Adds createdAt and updatedAt
+        timestamps: true,
     }
 );
 
-// Hash password before saving
 userSchema.pre('save', async function (next) {
-    // Only hash if password is modified
     if (!this.isModified('password')) {
         return next();
     }
@@ -55,7 +53,6 @@ userSchema.pre('save', async function (next) {
     }
 });
 
-// Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
     try {
         return await bcrypt.compare(candidatePassword, this.password);
@@ -64,7 +61,6 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
     }
 };
 
-// Method to get user without sensitive data
 userSchema.methods.toJSON = function () {
     const user = this.toObject();
     delete user.password;

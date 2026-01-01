@@ -1,9 +1,5 @@
 import { errorResponse } from '../utils/responseHandler.js';
 
-/**
- * Middleware to check if user has required role
- * @param  {...string} roles - Allowed roles
- */
 export const authorize = (...roles) => {
     return (req, res, next) => {
         if (!req.user) {
