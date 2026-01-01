@@ -70,6 +70,22 @@ npm run dev
 
 Frontend will run on `http://localhost:5173`
 
+## 🔑 Admin Credentials
+
+For testing admin features:
+
+```
+Email: admin@example.com
+Password: Admin123
+```
+
+The admin user is automatically created on first backend startup.
+
+**Admin capabilities:**
+- View all users' tasks
+- Edit/delete any user's task  
+- Access admin panel in dashboard
+
 ## 📚 API Documentation
 
 Use **Postman** or any HTTP client to test the API. All endpoints are documented in the backend README file.
