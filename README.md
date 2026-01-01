@@ -221,39 +221,3 @@ Use **Postman** or any HTTP client to test the API endpoints.
 2. Login with credentials
 3. Create, edit, and delete tasks
 4. Test filtering by status and priority
-
-## 📝 Scalability Notes
-
-See `SCALABILITY.md` for detailed notes on:
-- Microservices architecture
-- Caching strategies
-- Load balancing
-- Database optimization
-- Horizontal scaling
-
-## 🤝 Contributing
-
-This is an assignment project. For any issues or suggestions, please contact the developer.
-
-## 📄 License
-
-ISC
-
-## 👨‍💻 Author
-
-Created for PrimeTrade Backend Developer Internship Assignment
-
-## 📧 Submission
-
-**Email To**: 
-- saami@bajarangs.com
-- nagasai@bajarangs.com
-- chetan@bajarangs.com
-
-**CC**: sonika@primetrade.ai
-
-**Subject**: Backend Developer Task - [Your Name]
-
----
-
-**Happy Coding! 🎉**
