@@ -214,7 +214,7 @@ PrimeTradeAssignment/
 ## 🧪 Testing
 
 ### Backend Testing
-Use **Postman** or any HTTP client to test the API endpoints.
+Use **Postman** to test the API endpoints.
 
 ### Frontend Testing
 1. Register a new user
