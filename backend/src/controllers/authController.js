@@ -112,9 +112,10 @@ export const getMe = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
     try {
-        res.cookie('token', '', {
+        res.clearCookie('token', {
             httpOnly: true,
-            expires: new Date(0),
+            secure: true,
+            sameSite: 'none',
         });
 
         return successResponse(res, 200, 'Logout successful');
